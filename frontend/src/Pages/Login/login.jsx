@@ -47,7 +47,7 @@ const Login = ({ setShowLoginForm }) => {
           <button
             type="button"
             className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md"
-            onClick={handleLogin}
+            onClick={()=>{handleLogin()}}
           >
             Submit
           </button>

@@ -1,0 +1,27 @@
+/* src/App.css */
+@import 'animate.css';
+
+/* App.css */
+body {
+    font-family: Arial, sans-serif;
+  }
+  
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+  }
+  
+  .App {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .flex {
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  .flex-1 {
+    flex: 1;
+  }
+  

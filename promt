@@ -1,0 +1,407 @@
+very nice make the very good and professional design for thr the landing page for the gym consider the theme of the website to be in red and black and right code for that in reactjs only for now with tailwind so make prfessional hero section with good motiation for the gym rigth now extract images froo the web in fututee i will change the image of the bg and after small scroll down make the login form with heading and form contain USERNAME and PAssword with the button to submit it and below or maybe on the side cresate the registration form with email is username password adn the option to upload the image then left the area on thetop side to show its img in future for backend processing the make the button witht forget password and register button also make it properlly responsive hightly responsive 
+
+
+DESIGN1 
+// import { useState } from 'react'
+// import reactLogo from './assets/react.svg'
+// import viteLogo from '/vite.svg'
+// import './App.css'
+// import Home from './Pages/Home/home'
+
+// function App() {
+//   const [count, setCount] = useState(0)
+
+//   return (
+//     <>
+    
+//       <h1 className='text-green-300'>Vite + React</h1>
+//       <Home/>
+    
+//       <p className="read-the-docs">
+//         Click on the Vite and React logos to learn more
+//       </p>
+//     </>
+//   )
+// }
+
+// export default App
+
+
+
+
+
+
+
+import { useState } from 'react';
+
+const App = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    profileImage: null
+  });
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData({
+      ...formData,
+      [name]: files ? files[0] : value
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData); // Replace with API call later
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* Hero Section */}
+      <section className="relative h-screen flex items-center justify-center bg-black overflow-hidden">
+        {/* Background Overlay */}
+        <div className="absolute inset-0 bg-red-900 opacity-30"></div>
+        
+        {/* Motivational Text */}
+        <div className="z-10 text-center px-4">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-red-600">
+            TRANSFORM YOUR BODY
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
+            Join the ultimate fitness experience. Push your limits. Achieve greatness.
+          </p>
+          <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">
+            GET STARTED
+          </button>
+        </div>
+      </section>
+
+      {/* Forms Section */}
+      <section className="py-20 px-4 bg-gray-900">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
+          {/* Login Form */}
+          <div className="bg-gray-800 p-8 rounded-lg shadow-xl border-l-4 border-red-600">
+            <h2 className="text-3xl font-bold mb-6 text-red-600">Member Login</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  className="w-full p-3 bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                  required
+                />
+              </div>
+              <div className="mb-6">
+                <label className="block text-gray-300 mb-2">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  className="w-full p-3 bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition duration-300"
+              >
+                LOGIN
+              </button>
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  className="text-red-400 hover:text-red-300 text-sm"
+                  onClick={() => setIsLogin(false)}
+                >
+                  Don't have an account? Register
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Registration Form */}
+          <div className={`bg-gray-800 p-8 rounded-lg shadow-xl border-l-4 border-red-600 ${isLogin ? 'hidden md:block' : ''}`}>
+            <h2 className="text-3xl font-bold mb-6 text-red-600">New Member</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  className="w-full p-3 bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-300 mb-2">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  className="w-full p-3 bg-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                  required
+                />
+              </div>
+              <div className="mb-6">
+                <label className="block text-gray-300 mb-2">Profile Image</label>
+                <div className="flex items-center">
+                  <div className="w-16 h-16 rounded-full bg-gray-700 mr-4 overflow-hidden">
+                    {/* Placeholder for image preview */}
+                    {formData.profileImage ? (
+                      <img 
+                        src={URL.createObjectURL(formData.profileImage)} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    name="profileImage"
+                    accept="image/*"
+                    onChange={handleChange}
+                    className="hidden"
+                    id="profileImage"
+                  />
+                  <label 
+                    htmlFor="profileImage" 
+                    className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded cursor-pointer transition duration-300"
+                  >
+                    Choose Image
+                  </label>
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition duration-300"
+              >
+                REGISTER
+              </button>
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  className="text-red-400 hover:text-red-300 text-sm"
+                  onClick={() => setIsLogin(true)}
+                >
+                  Already have an account? Login
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default App;
+
+
+
+
+
+
+
+DESIGN2
+
+
+
+
+import React, { useState } from 'react';
+import { useRef } from 'react';
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState('login');
+  const [previewImage, setPreviewImage] = useState(null);
+  const formSectionRef = useRef(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const scrollToForm = () => {
+    formSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Hero Section */}
+      <section className="relative h-screen flex items-center justify-center bg-black overflow-hidden">
+        {/* Background image placeholder */}
+        <div 
+          className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-50"
+        ></div>
+        
+        <div className="relative z-10 px-4 text-center max-w-4xl">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-red-600">
+            TRANSFORM YOUR BODY. <span className="text-white">ELEVATE YOUR LIFE.</span>
+          </h1>
+          <p className="text-xl md:text-2xl mb-8">
+            Join our community of fitness enthusiasts and start your journey to a stronger, healthier you today.
+          </p>
+          <button 
+            onClick={scrollToForm}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 transform hover:scale-105"
+          >
+            GET STARTED
+          </button>
+        </div>
+
+        <div className="absolute bottom-10 left-0 right-0 flex justify-center">
+          <svg 
+            onClick={scrollToForm}
+            className="animate-bounce w-10 h-10 text-red-600 cursor-pointer" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
+      </section>
+
+      {/* Forms Section */}
+      <section 
+        ref={formSectionRef}
+        className="py-20 px-4 bg-gray-900"
+      >
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-red-600">
+            JOIN OUR FITNESS COMMUNITY
+          </h2>
+
+          <div className="flex flex-col lg:flex-row gap-10">
+            {/* Login Form */}
+            <div className={`flex-1 bg-gray-800 p-8 rounded-lg shadow-xl ${activeTab === 'login' ? 'block' : 'hidden lg:block'}`}>
+              <h3 className="text-2xl font-bold mb-6 text-white">Member Login</h3>
+              <form className="space-y-6">
+                <div>
+                  <label htmlFor="username" className="block text-sm font-medium mb-2">Username</label>
+                  <input 
+                    type="text" 
+                    id="username" 
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Enter your username"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium mb-2">Password</label>
+                  <input 
+                    type="password" 
+                    id="password" 
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Enter your password"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <button 
+                    type="submit" 
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                  >
+                    Sign In
+                  </button>
+                  <a href="#" className="text-red-400 hover:text-red-300 text-sm">Forgot Password?</a>
+                </div>
+              </form>
+
+              <div className="mt-6 lg:hidden">
+                <p className="text-center text-gray-400">Don't have an account?</p>
+                <button 
+                  onClick={() => setActiveTab('register')}
+                  className="w-full mt-2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                >
+                  Register Now
+                </button>
+              </div>
+            </div>
+
+            {/* Registration Form */}
+            <div className={`flex-1 bg-gray-800 p-8 rounded-lg shadow-xl ${activeTab === 'register' ? 'block' : 'hidden lg:block'}`}>
+              <h3 className="text-2xl font-bold mb-6 text-white">New Member Registration</h3>
+              <form className="space-y-6">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="reg-password" className="block text-sm font-medium mb-2">Password</label>
+                  <input 
+                    type="password" 
+                    id="reg-password" 
+                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Create a password"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="profile-image" className="block text-sm font-medium mb-2">Profile Image (Optional)</label>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 rounded-full bg-gray-700 border border-gray-600 overflow-hidden">
+                      {previewImage ? (
+                        <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-500">
+                          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <label className="flex-1">
+                      <div className="bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-lg px-4 py-3 cursor-pointer transition duration-300">
+                        <span className="text-sm">Choose Image</span>
+                        <input 
+                          type="file" 
+                          id="profile-image" 
+                          className="hidden" 
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                        />
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <button 
+                  type="submit" 
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                >
+                  Register
+                </button>
+              </form>
+
+              <div className="mt-6 lg:hidden">
+                <p className="text-center text-gray-400">Already have an account?</p>
+                <button 
+                  onClick={() => setActiveTab('login')}
+                  className="w-full mt-2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                >
+                  Login
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default App;

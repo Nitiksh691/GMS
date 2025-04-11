@@ -7,45 +7,45 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MemberCard from '../MemberCard/MemberCard';
+import Modal from '../../Pages/modal/modal';
+import Addmembership from '../AddMembership/Addmembership';
+import AddMember from '../AddMember/AddMember';
 
 const Member = () => {
+  const [addMembership, setAddMembership] = useState(false);
+  const [addMember, setAddmember] = useState(false);
   const [search, setSearch] = useState('');
   const [isSearchModeOn, setIsSearchModeOn] = useState(false);
   const [totalData, setTotalData] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [noOfPage, setNoOfPage] = useState(6); // example default
+  const [noOfPage, setNoOfPage] = useState(6);
 
   const handleSearchData = () => {
-    setIsSearchModeOn(true);
-    // Implement your search logic here
-    console.log('Searching for:', search);
-  };
-
-  const handleMembers = () => {
-    // handle add member logic here
-    console.log('Add member clicked');
+    // implement search logic here
+    console.log("Search clicked:", search);
   };
 
   const handleMemberShip = () => {
-    // handle membership logic here
+    setAddMembership((prev) => !prev);
     console.log('Membership clicked');
   };
 
+  const handleMembers = () => {
+    setAddmember((prev) => !prev);
+    console.log('Add member clicked');
+  };
+
   const handlePrev = () => {
-    if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   const handleNext = () => {
-    if (currentPage < noOfPage) {
-      setCurrentPage(prev => prev + 1);
-    }
+    if (currentPage < noOfPage) setCurrentPage(currentPage + 1);
   };
 
   return (
     <div className='text-black p-5 w-3/4 text-green-700'>
-      {/* banner */}
+      {/* Banner */}
       <div className='bg-slate-900 flex justify-between w-full text-white rounded-lg p-3'>
         <div
           className='border-2 pl-3 pr-3 pt-1 pb-1 rounded-2xl cursor-pointer hover:bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:text-black'
@@ -61,6 +61,7 @@ const Member = () => {
         </div>
       </div>
 
+      {/* Back link */}
       <Link to={'/dashboard'} className='flex items-center gap-2 mt-3 text-blue-600 hover:underline'>
         <ArrowBackIcon /> Back to Dashboard
       </Link>
@@ -114,6 +115,22 @@ const Member = () => {
         <MemberCard />
         <MemberCard />
       </div>
+
+      {/* Modals */}
+      {addMembership && (
+        <Modal
+          header='Add Membership'
+          handleClose={handleMemberShip}
+          content={<Addmembership handleClose={handleMemberShip} />}
+        />
+      )}
+      {addMember && (
+        <Modal
+          header='Add New Member'
+          handleClose={handleMembers}
+          content={<AddMember />}
+        />
+      )}
     </div>
   );
 };

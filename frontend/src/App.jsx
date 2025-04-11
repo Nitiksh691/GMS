@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import Home from "./Components/Home/home";
+
 import Dashboard from "./Components/Dsashboard/Dashboard";
 import Sidebar from "./Pages/Sidebar/sidebar";
 import Member from "./Components/Member/Member";
+import Home from "./Pages/Home/home";
 
 function App() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ function App() {
       {isLogin && <Sidebar />}
       <div className="flex-1   text-white p-8">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home/>} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/member" element={<Member/>} />
         </Routes>

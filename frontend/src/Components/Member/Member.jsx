@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import AddIcon from '@mui/icons-material/Add';
@@ -16,13 +16,43 @@ const Member = () => {
   const [addMember, setAddmember] = useState(false);
   const [search, setSearch] = useState('');
   const [isSearchModeOn, setIsSearchModeOn] = useState(false);
-  const [totalData, setTotalData] = useState(0);
+
+  // pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [noOfPage, setNoOfPage] = useState(6);
+  const [startFrom, setSTartFrom] = useState(0);
+  const [endTo, setEndTo] = useState(0);
+  const [totalData, setTotalData] = useState(0);
+  const [noOfPage, setNoOfPage] = useState(0);
+  const [limit, setLimit] = useState(9);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    let totalData = 52;
+    setTotalData(totalData);
+
+    let extraPage = totalData % limit === 0 ? 0 : 1;
+    let totalPage = parseInt(totalData / limit) + extraPage;
+
+    setNoOfPage(totalPage);
+
+    if (totalData === 0) {
+      // No members
+      setSTartFrom(-1);
+      setEndTo(0);
+    }else if (totalData<10) {
+      setSTartFrom(0)
+      setEndTo(totalData)
+    } else {
+      
+    }
+  };
 
   const handleSearchData = () => {
     // implement search logic here
-    console.log("Search clicked:", search);
+    console.log('Search clicked:', search);
   };
 
   const handleMemberShip = () => {
@@ -36,11 +66,29 @@ const Member = () => {
   };
 
   const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
+    if (currentPage!==1) {
+      let CurrPage= currentPage-1;
+      setCurrentPage(CurrPage);
+      var from = (CurrPage-1)*9;
+      var to = (CurrPage*9);
+      setSTartFrom(from);
+      setEndTo(to)
+    }
   };
 
   const handleNext = () => {
-    if (currentPage < noOfPage) setCurrentPage(currentPage + 1);
+    if (currentPage !== noOfPage) {
+      let CurrPage= currentPage + 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  + 1;
+      setCurrentPage(CurrPage);
+      var from = (CurrPage-1)*9;
+      var to = (CurrPage*9);
+      if(to>totalData){
+        to=totalData;
+      }
+      setSTartFrom(from);
+      setEndTo(to)
+
+    }
   };
 
   return (
@@ -86,27 +134,29 @@ const Member = () => {
       {/* Summary and pagination */}
       <div className='mt-5 text-xl flex justify-between text-slate-900'>
         <div>Total Members {isSearchModeOn ? totalData : null}</div>
-        {!isSearchModeOn && (
+        {!isSearchModeOn ? (
           <div className='flex gap-5'>
-            <div>{`${(currentPage - 1) * 9 + 1}-${Math.min(currentPage * 9, 53)} of 53 Members`}</div>
+            <div>
+              {startFrom + 1} - {endTo} of {totalData} Members
+            </div>
             <div
-              className={`w-8 h-8 cursor-pointer border-2 flex items-center justify-center rounded-full hover:text-white hover:bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 ${
-                currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''
+              className={`w-8 h-8 cursor-pointer border-2 flex items-center justify-center hover:text-white hover:bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 ${
+                currentPage === 1 ? 'bg-gray-200 text-gray-400' : 'null'
               }`}
               onClick={handlePrev}
             >
               <ChevronLeftIcon />
             </div>
             <div
-              className={`w-8 h-8 cursor-pointer border-2 flex items-center justify-center rounded-full hover:text-white hover:bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 ${
-                currentPage === noOfPage ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''
+              className={`w-8 h-8 cursor-pointer border-2 flex items-center justify-center hover:text-white hover:bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 ${
+                currentPage === noOfPage ? 'bg-gray-200 text-gray-400' : 'null'
               }`}
               onClick={handleNext}
             >
               <ChevronRightIcon />
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Member Cards */}

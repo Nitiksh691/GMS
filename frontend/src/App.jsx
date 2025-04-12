@@ -5,6 +5,7 @@ import Dashboard from "./Components/Dsashboard/Dashboard";
 import Sidebar from "./Pages/Sidebar/sidebar";
 import Member from "./Components/Member/Member";
 import Home from "./Pages/Home/home";
+import GeneralUser from "./Pages/GenralUser/GeneralUser";
 
 function App() {
   const navigate = useNavigate();
@@ -24,11 +25,12 @@ function App() {
   return (
     <div className="flex min-h-screen ">
       {isLogin && <Sidebar />}
-      <div className="flex-1   text-white p-8">
+      <div className="flex-1    p-8">
         <Routes>
           <Route path="/" element={<Home/>} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/member" element={<Member/>} />
+          <Route path="/specific/:pages" element={<GeneralUser/>} />
         </Routes>
       </div>
     </div>

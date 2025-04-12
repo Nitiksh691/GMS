@@ -7,9 +7,7 @@ import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import ReportIcon from '@mui/icons-material/Report';
 import PersonOffIcon from '@mui/icons-material/PersonOff';
 import { Link } from 'react-router-dom';
-import Member from '../Member/Member';
 
-// ✅ Card component
 const CardBlock = ({ icon, title }) => {
   return (
     <div className="w-full h-fit border-2 bg-white rounded-lg cursor-pointer hover:shadow-xl transition duration-200 ease-in-out">
@@ -22,7 +20,10 @@ const CardBlock = ({ icon, title }) => {
   );
 };
 
-// ✅ Main Dashboard component
+const handleClickMenu = (value) => {
+  sessionStorage.setItem("func", value);
+};
+
 const Dashboard = () => {
   const [accordionDashboard, setAccordionDashboard] = React.useState(false);
 
@@ -38,13 +39,24 @@ const Dashboard = () => {
       </div>
 
       <div className='mt-5 pt-3 bg-slate-100 bg-opacity-50 grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full pb-5 overflow-x-auto h-[80%]'>
-        <Link to={'/member'}> 
-        <CardBlock icon={<PeopleAltIcon sx={{ color: 'blue', fontSize: 50 }} />} title="Members Joined" /> </Link>
-        <CardBlock icon={<PersonAddAltIcon sx={{ color: 'green', fontSize: 50 }} />} title="Monthly Joined" />
-        <CardBlock icon={<AccessAlarmIcon sx={{ color: 'orange', fontSize: 50 }} />} title="Expiry Within 3 Days" />
-        <CardBlock icon={<WatchLaterIcon sx={{ color: 'goldenrod', fontSize: 50 }} />} title="Expiry in 4-7 Days" />
-        <CardBlock icon={<ReportIcon sx={{ color: 'red', fontSize: 50 }} />} title="Expired" />
-        <CardBlock icon={<PersonOffIcon sx={{ color: 'gray', fontSize: 50 }} />} title="Inactive Members" />
+        <Link to={'/member'} onClick={() => handleClickMenu("members-joined")}>
+          <CardBlock icon={<PeopleAltIcon sx={{ color: 'blue', fontSize: 50 }} />} title="Members Joined" />
+        </Link>
+        <Link to={'/specific/monthly-joined'} onClick={() => handleClickMenu("monthly-joined")}>
+          <CardBlock icon={<PersonAddAltIcon sx={{ color: 'green', fontSize: 50 }} />} title="Monthly Joined" />
+        </Link>
+        <Link to={'/specific/expired-in-3-days'} onClick={() => handleClickMenu("three-day-expire")}>
+          <CardBlock icon={<AccessAlarmIcon sx={{ color: 'orange', fontSize: 50 }} />} title="Expiry Within 3 Days" />
+        </Link>
+        <Link to={'/specific/expired-4-7-days'} onClick={() => handleClickMenu("four-seven-expire")}>
+          <CardBlock icon={<WatchLaterIcon sx={{ color: 'goldenrod', fontSize: 50 }} />} title="Expiry in 4-7 Days" />
+        </Link>
+        <Link to={'/specific/expired'} onClick={() => handleClickMenu("expired")}>
+          <CardBlock icon={<ReportIcon sx={{ color: 'red', fontSize: 50 }} />} title="Expired" />
+        </Link>
+        <Link to={'/specific/inactive'} onClick={() => handleClickMenu("inactive-members")}>
+          <CardBlock icon={<PersonOffIcon sx={{ color: 'gray', fontSize: 50 }} />} title="Inactive Members" />
+        </Link>
       </div>
     </div>
   );

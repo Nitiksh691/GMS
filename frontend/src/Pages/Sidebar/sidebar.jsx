@@ -52,16 +52,16 @@ const Sidebar = () => {
             <FaHome className="mr-3" /> Home
           </Link>
           <Link
-            to="/"
+            to="/dashboard"
             className="flex items-center p-3 rounded hover:bg-gray-700"
           >
-            <FaUser className="mr-3" /> Profile
+            <FaUser className="mr-3" /> Dashboard
           </Link>
           <Link
-            to="/"
+            to="/member"
             className="flex items-center p-3 rounded hover:bg-gray-700"
           >
-            <FaCog className="mr-3" /> Settings
+            <FaCog className="mr-3" /> Member
           </Link>
         </nav>
 

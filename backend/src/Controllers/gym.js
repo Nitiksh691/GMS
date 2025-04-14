@@ -6,21 +6,22 @@ const jwt = require('jsonwebtoken');
 
 
 
-
-// REGISTER
+// ================== REGISTER ==================
 exports.register = async (req, res) => {
   try {
     const { email, userName, password, profilePic, gymName } = req.body;
 
+    // Check for existing user
     const existingUser = await GymUser.findOne({ userName });
 
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists', success: false });
     }
 
-    // Hash the password
+    // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create new user
     const newUser = await GymUser.create({
       email,
       userName,
@@ -29,7 +30,11 @@ exports.register = async (req, res) => {
       gymName,
     });
 
-    return res.status(201).json({ message: 'User registered successfully', success: true, newUser });
+    return res.status(201).json({
+      message: 'User registered successfully',
+      success: true,
+      newUser
+    });
 
   } catch (error) {
     console.error('Register Error:', error);
@@ -37,43 +42,37 @@ exports.register = async (req, res) => {
   }
 };
 
-
-
+// ================== LOGIN ==================
 exports.login = async (req, res) => {
   try {
-
-    console.log("⏳ Login route hit");
     const { userName, password } = req.body;
-    console.log("📨 Credentials received:", userName);
 
     // Check if user exists
     const user = await GymUser.findOne({ userName });
+    console.log("User found:", user);
+
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match:", isMatch);
+
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid password' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    console.log("🛠 JWT_SECRETKEY is:", process.env.JWT_SECRETKEY);
+    // Generate JWT token
     const token = jwt.sign({ gym_id: user._id }, process.env.JWT_SECRETKEY, {
       expiresIn: '1d',
     });
 
-    console.log("JWT Token:");
-
-    // Hide password in response
-    const { password: _, ...userWithoutPassword } = user._doc;
-
-    // Send response with token
     return res.status(200).json({
       message: 'Logged in Successfully',
       success: true,
       token,
-      user: userWithoutPassword,
+      user
     });
 
   } catch (error) {
@@ -81,12 +80,6 @@ exports.login = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
-
-
-
-
-
 
 
 //   RESET-PASSWORD
@@ -132,8 +125,7 @@ exports.sendResetLink = async (req, res) => {
       console.error(error);
       res.status(500).json({ message: 'Something went wrong' });
     }
-  };
-
+};
 
 //   CHECK OTP
   exports.checkOTP = async (req, res) => {
@@ -166,8 +158,7 @@ exports.sendResetLink = async (req, res) => {
         message: 'An internal server error occurred'
       });
     }
-  };
-  
+};
 
 // RESET----PASSWORD
 exports.resetPassword = async (req, res) => {

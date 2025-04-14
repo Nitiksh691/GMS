@@ -20,7 +20,9 @@ app.use('/auth', GymRoute);  // This will make /auth/register route work
 connectDB();
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ;
+console.log(process.env.JWT_SECRETKEY);
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

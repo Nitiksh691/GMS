@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MemberCard from '../../Components/MemberCard/MemberCard';
 
 const GeneralUser = () => {
   const [header, setHeader] = useState("");
@@ -48,8 +49,18 @@ const GeneralUser = () => {
         {header}
       </div>
 
+    <div className="grid gap-2 grid-cols-3 overflow-x-auto h-[80%] rounded-lg p-5 mt-5 bg-slate-100">
+      <MemberCard/>
+      <MemberCard/>
+      <MemberCard/>
+      <MemberCard/>
+      <MemberCard/>
+    </div>
+
+
+
       {/* You can map and show actual data here if needed */}
-      <div className='mt-3'>
+      {/* <div className='mt-3'>
         {data.length === 0 ? (
           <p>No data loaded.</p>
         ) : (
@@ -57,7 +68,7 @@ const GeneralUser = () => {
             <div key={index} className='p-2 border-b'>{item}</div>
           ))
         )}
-      </div>
+      </div> */}
     </div>
   );
 };

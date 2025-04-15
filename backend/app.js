@@ -1,11 +1,13 @@
 require('dotenv').config()
 const express = require('express');
-const GymRoute = require('./src/Routes/gym');  // Ensure correct path
-const connectDB = require('./src/Config/db');  // Ensure correct path
+const connectDB = require('./src/Config/db');  
 const cookiePArser = require('cookie-parser')
 
 
-
+// Routes
+const GymRoute = require('./src/Routes/gym');  
+const MemberShipRoutes = require('./src/Routes/Membership')
+const MemberRoute = require("./src/Routes/member")
 
 const app = express();
 
@@ -13,15 +15,16 @@ const app = express();
 app.use(cookiePArser())
 app.use(express.json());
 
-// Use the gym route with prefix /auth
-app.use('/auth', GymRoute);  // This will make /auth/register route work
+
+app.use('/auth', GymRoute); 
+app.use("/plans",MemberShipRoutes)
+app.use("/member",MemberRoute) 
 
 // Connect to MongoDB
 connectDB();
 
 // Start the server
 const PORT = process.env.PORT ;
-console.log(process.env.JWT_SECRETKEY);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

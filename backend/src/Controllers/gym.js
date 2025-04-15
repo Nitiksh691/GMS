@@ -68,6 +68,13 @@ exports.login = async (req, res) => {
       expiresIn: '1d',
     });
 
+    res.cookie('cookie_token', token, {
+      httpOnly: true,
+      secure: false, // true in production
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
     return res.status(200).json({
       message: 'Logged in Successfully',
       success: true,
@@ -200,3 +207,13 @@ exports.resetPassword = async (req, res) => {
     });
   }
 };
+
+exports.logout = async (req,res) => {
+  res.clearCookie("cookie_token",token, {
+    httpOnly: true,
+    secure: false, // true in production
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000
+  }).json({message:"You are Logged out Mf!!"})
+}
+

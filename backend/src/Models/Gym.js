@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // Define schema for Gym User
-const GymUserSchema = new mongoose.Schema(
+const gymSchema = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -37,5 +37,5 @@ const GymUserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Export the GymUser model
-module.exports = mongoose.model("GymUser", GymUserSchema);
+// Export the gym model
+module.exports = mongoose.model("gym", gymSchema);

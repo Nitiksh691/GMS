@@ -1,4 +1,4 @@
-const GymUser = require("../Models/Gym");
+const gym = require("../Models/Gym");
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
     const { email, userName, password, profilePic, gymName } = req.body;
 
     // Check for existing user
-    const existingUser = await GymUser.findOne({ userName });
+    const existingUser = await gym.findOne({ userName });
 
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists', success: false });
@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
-    const newUser = await GymUser.create({
+    const newUser = await gym.create({
       email,
       userName,
       password: hashedPassword,
@@ -48,17 +48,13 @@ exports.login = async (req, res) => {
     const { userName, password } = req.body;
 
     // Check if user exists
-    const user = await GymUser.findOne({ userName });
-    console.log("User found:", user);
-
+    const user = await gym.findOne({ userName });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password match:", isMatch);
-
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -68,18 +64,28 @@ exports.login = async (req, res) => {
       expiresIn: '1d',
     });
 
+    // Set cookie
     res.cookie('cookie_token', token, {
       httpOnly: true,
-      secure: false, // true in production
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 24 * 60 * 60 * 1000
     });
+
+    // Return response
+    const userData = {
+      _id: user._id,
+      email: user.email,
+      userName: user.userName,
+      gymName: user.gymName,
+      profilePic: user.profilePic
+    };
 
     return res.status(200).json({
       message: 'Logged in Successfully',
       success: true,
       token,
-      user
+      user: userData
     });
 
   } catch (error) {
@@ -94,7 +100,7 @@ exports.sendResetLink = async (req, res) => {
     const { email } = req.body;
   
     try {
-      const user = await GymUser.findOne({ email });
+      const user = await gym.findOne({ email });
   
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
@@ -117,7 +123,8 @@ exports.sendResetLink = async (req, res) => {
         },
       });
   
-      const resetURL = `http://localhost:3000/reset-password/${resetToken}`;
+      const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+
   
       await transporter.sendMail({
         to: email,
@@ -140,7 +147,7 @@ exports.sendResetLink = async (req, res) => {
       const { email, token } = req.body;
   
       // Find user with matching token and check token expiry
-      const user = await GymUser.findOne({
+      const user = await gym.findOne({
         email,
         resetPasswordToken: token,
         resetPasswordExpires: { $gt: Date.now() }
@@ -165,7 +172,7 @@ exports.sendResetLink = async (req, res) => {
         message: 'An internal server error occurred'
       });
     }
-};
+}; 
 
 // RESET----PASSWORD
 exports.resetPassword = async (req, res) => {
@@ -173,7 +180,7 @@ exports.resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
 
     // Find user by token and check if token is still valid
-    const user = await GymUser.findOne({
+    const user = await gym.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() }
     });
@@ -208,12 +215,12 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-exports.logout = async (req,res) => {
-  res.clearCookie("cookie_token",token, {
+exports.logout = async (req, res) => {
+  res.clearCookie("cookie_token", {
     httpOnly: true,
-    secure: false, // true in production
+    secure: process.env.NODE_ENV === 'production'||"false",
     sameSite: 'strict',
-    maxAge: 24 * 60 * 60 * 1000
-  }).json({message:"You are Logged out Mf!!"})
-}
+  });
 
+  return res.status(200).json({ message: "Logged out successfully" });
+};

@@ -9,9 +9,9 @@ const Sidebar = () => {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("isLogin");
+    localStorage.clear();
     navigate("/");
-    window.location.reload(); // optional: force refresh to reset state
+    // window.location.reload(); // optional: force refresh to reset state
   };
 
   return (

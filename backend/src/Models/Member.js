@@ -18,12 +18,12 @@ const MemberSchema = new mongoose.Schema(
     },
     membership: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Membership",
+      ref: "membership",
       required: true,
     },
     gym: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "GymUser",
+      ref: "gym",
       required: true,
     },
     profilePic: {

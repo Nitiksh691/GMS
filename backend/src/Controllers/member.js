@@ -1,5 +1,5 @@
 const Member = require("../Models/Member");
-const Membership = require("../Models/Membershiop");
+const Membership = require("../Models/Membership");
 
 // Helper to add months to a date
 function addMonthsToDate(months, joiningDate) {
@@ -18,18 +18,17 @@ exports.getAllMember = async (req, res) => {
     const skip = parseInt(req.query.skip) || 0;
     const limit = parseInt(req.query.limit) || 10;
 
-    const members = await Member.find({ gym: req.user._id });
-    const totalMembers = members.length;
+    const totalMembers = await Member.countDocuments({ gym: req.user._id });
 
-    const limitedMembers = await Member.find({ gym: req.user._id })
+    const members = await Member.find({ gym: req.user._id })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     res.status(200).json({
       message: totalMembers ? "Fetched members successfully" : "No members found",
-      members: limitedMembers,
-      totalMembers: totalMembers,
+      members,
+      totalMembers,
     });
   } catch (error) {
     console.error("Error fetching members:", error);
@@ -46,13 +45,11 @@ exports.registerMember = async (req, res) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    // Check for existing member with the same phone
     const existingMember = await Member.findOne({ gym: req.user._id, mobileNo });
     if (existingMember) {
       return res.status(400).json({ message: "Already registered with this number." });
     }
 
-    // Find membership plan
     const foundMembership = await Membership.findOne({ _id: membership, gym: req.user._id });
     if (!foundMembership) {
       return res.status(404).json({ message: "Membership plan not found." });
@@ -81,118 +78,217 @@ exports.registerMember = async (req, res) => {
   }
 };
 
-
 exports.searchMember = async (req, res) => {
-    try {
-      const { SearchTerm } = req.query;
-  
-      const members = await Member.find({
-        gym: req.user._id,
-        $or: [
-          { name: { $regex: SearchTerm, $options: 'i' } },  // Case-insensitive search
-          { mobileNo: { $regex: SearchTerm, $options: 'i' } },
-        ],
-      });
-  
-      res.status(200).json({
-        message: members.length ? "Fetched members successfully" : "No members found",
-        members: members,
-        totalMembers: members.length,
-      });
-    } catch (err) {
-      console.error('Error fetching members:', err);
-      res.status(500).json({ message: "Server error" });
-    }
-  };
+  try {
+    const { SearchTerm } = req.query;
 
+    const members = await Member.find({
+      gym: req.user._id,
+      $or: [
+        { name: { $regex: SearchTerm, $options: "i" } },
+        { mobileNo: { $regex: SearchTerm, $options: "i" } },
+      ],
+    });
+
+    res.status(200).json({
+      message: members.length ? "Fetched members successfully" : "No members found",
+      members,
+      totalMembers: members.length,
+    });
+  } catch (err) {
+    console.error("Error fetching members:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 exports.monthlyMember = async (req, res) => {
-    try {
-      const now = new Date();
-  
-      // Start of current month (e.g., April 1, 2025 00:00:00)
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-  
-      // End of current month (e.g., April 30, 2025 23:59:59)
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  
-      const members = await Member.find({
-        gym: req.user._id,
-        createdAt: {
-          $gte: startOfMonth,
-          $lte: endOfMonth,
-        },
-      }).sort({ createdAt: -1 });
-  
-      res.status(200).json({
-        message: members.length
-          ? "Fetched members successfully"
-          : "No members registered this month",
-        members: members,
-        totalMembers: members.length,
-      });
-    } catch (err) {
-      console.error("Error in monthlyMember:", err);
-      res.status(500).json({ error: "Server error while fetching monthly members" });
-    }
-  };
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-  exports.expiringWithin3Days = async (req, res) => {
-    try {
-      const today = new Date();
-      const nextThreeDays = new Date();
-      nextThreeDays.setDate(today.getDate() + 3);
-  
-      const members = await Member.find({
-        gym: req.user._id,
-        nextBillDate: {
-          $gte: today,
-          $lte: nextThreeDays,
-        },
-      });
-  
-      res.status(200).json({
-        message: members.length
-          ? "Fetched members successfully"
-          : "No members expiring in the next 3 days.",
-        members: members,
-        totalMembers: members.length,
-      });
-  
-    } catch (err) {
-      console.log("Error in expiringWithin3Days:", err);
-      res.status(500).json({ error: 'Server error' });
-    }
-  };
+    const members = await Member.find({
+      gym: req.user._id,
+      createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+    }).sort({ createdAt: -1 });
 
-  exports.expiringWithin4To7Days = async (req, res) => {
-    try {
-      const today = new Date();
-  
-      const day4 = new Date();
-      day4.setDate(today.getDate() + 4);
-  
-      const day7 = new Date();
-      day7.setDate(today.getDate() + 7);
-  
-      const members = await Member.find({
-        gym: req.user._id,
-        nextBillDate: {
-          $gte: day4,
-          $lte: day7,
-        },
-      });
-  
-      res.status(200).json({
-        message: members.length
-          ? "Fetched members successfully"
-          : "No members expiring between 4 to 7 days.",
-        members: members,
-        totalMembers: members.length,
-      });
-    } catch (err) {
-      console.log("Error in expiringWithin4To7Days:", err);
-      res.status(500).json({ error: "Server error" });
+    res.status(200).json({
+      message: members.length
+        ? "Fetched members successfully"
+        : "No members registered this month",
+      members,
+      totalMembers: members.length,
+    });
+  } catch (err) {
+    console.error("Error in monthlyMember:", err);
+    res.status(500).json({ error: "Server error while fetching monthly members" });
+  }
+};
+
+exports.expiringWithin3Days = async (req, res) => {
+  try {
+    const today = new Date();
+    const nextThreeDays = new Date();
+    nextThreeDays.setDate(today.getDate() + 3);
+
+    const members = await Member.find({
+      gym: req.user._id,
+      nextBillDate: { $gte: today, $lte: nextThreeDays },
+    });
+
+    res.status(200).json({
+      message: members.length
+        ? "Fetched members successfully"
+        : "No members expiring in the next 3 days.",
+      members,
+      totalMembers: members.length,
+    });
+  } catch (err) {
+    console.error("Error in expiringWithin3Days:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.expiringWithin4To7Days = async (req, res) => {
+  try {
+    const today = new Date();
+    const day4 = new Date();
+    const day7 = new Date();
+    day4.setDate(today.getDate() + 4);
+    day7.setDate(today.getDate() + 7);
+
+    const members = await Member.find({
+      gym: req.user._id,
+      nextBillDate: { $gte: day4, $lte: day7 },
+    });
+
+    res.status(200).json({
+      message: members.length
+        ? "Fetched members successfully"
+        : "No members expiring between 4 to 7 days.",
+      members,
+      totalMembers: members.length,
+    });
+  } catch (err) {
+    console.error("Error in expiringWithin4To7Days:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.expired = async (req, res) => {
+  try {
+    const today = new Date();
+    const members = await Member.find({
+      gym: req.user._id,
+      status: "Active",
+      nextBillDate: { $lt: today },
+    });
+
+    res.status(200).json({
+      message: members.length
+        ? "Fetched expired members successfully"
+        : "No expired members found.",
+      members,
+      totalMembers: members.length,
+    });
+  } catch (err) {
+    console.error("Error in expired:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.inActive = async (req, res) => {
+  try {
+    const today = new Date();
+    const members = await Member.find({
+      gym: req.user._id,
+      status: "Inactive",
+      nextBillDate: { $lt: today },
+    });
+
+    res.status(200).json({
+      message: members.length
+        ? "Fetched inactive members successfully"
+        : "No inactive members found.",
+      members,
+      totalMembers: members.length,
+    });
+  } catch (err) {
+    console.error("Error in inActive:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.getMemberDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const member = await Member.findOne({ _id: id, gym: req.user._id });
+
+    if (!member) {
+      return res.status(404).json({ error: "No such member" });
     }
-  };
-  
+
+    res.status(200).json({
+      message: "Member data fetched",
+      member,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.changeStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const member = await Member.findOne({ _id: id, gym: req.user._id });
+    if (!member) {
+      return res.status(404).json({ error: "No such member" });
+    }
+
+    if (!["Active", "Inactive"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    member.status = status;
+    await member.save();
+
+    res.json({ message: "Member status updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.updateMemberPlan = async (req, res) => {
+  try {
+    const { membership } = req.body;
+    const { id } = req.params;
+
+    const memberShip = await Membership.findOne({ gym: req.user._id, _id: membership });
+    if (!memberShip) {
+      return res.status(404).json({ error: "Membership not found" });
+    }
+
+    const months = memberShip.months;
+    const today = new Date();
+    const nextBillDate = addMonthsToDate(months, today);
+
+    const member = await Member.findOne({ gym: req.user._id, _id: id });
+    if (!member) {
+      return res.status(404).json({ message: "No such member found" });
+    }
+
+    member.membership = membership;
+    member.nextBillDate = nextBillDate;
+    member.lastPayment = today;
+    await member.save();
+
+    res.json({ message: "Member plan updated successfully", member });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};

@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; 
 import Modal from "../modal/modal";
 import Forgetpass from "../ForgetPass/Forgetpass";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = ({ setShowLoginForm }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loginFields, setLoginFields] = useState({ username: "", password: "" });
+  const [loginFields, setLoginFields] = useState({ userName: "", password: "" });
   const navigate = useNavigate();
 
   const handleForgotPasswordClick = () => {
@@ -21,20 +24,42 @@ const Login = ({ setShowLoginForm }) => {
     setLoginFields((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-
-    const { username, password } = loginFields;
-
-    // Optional: Add basic validation here
-    if (!username || !password) {
-      alert("Please fill in both username and password.");
+  
+    const { userName, password } = loginFields;
+  
+    if (!userName || !password) {
+      toast.error("Please fill in both username and password.");
       return;
     }
-
-    sessionStorage.setItem("isLogin", "true");
-    navigate("/dashboard");
+    
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/auth/login",
+        { userName, password }, 
+        { withCredentials: true }
+      );
+      
+      // Handle successful login
+      toast.success("Login successful!");
+      console.log(response.data); // Log the response for debugging
+      
+      // Store user data and token
+      localStorage.setItem("isLogin", "true");
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("gymName",response.data.gymName);
+      localStorage.setItem("profilePic",response.data.profilePic)
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      navigate("/dashboard");
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || "Login failed. Please try again.";
+      toast.error(errorMessage);
+      console.error("Login error:", err);
+    }
   };
+
 
   return (
     <>
@@ -44,10 +69,10 @@ const Login = ({ setShowLoginForm }) => {
           <label className="block text-sm mb-2">Username</label>
           <input
             type="text"
-            name="username"
+            name="userName"  // Changed to match backend
             className="w-full p-3 bg-gray-700 text-white rounded-md"
             placeholder="Enter username"
-            value={loginFields.username}
+            value={loginFields.userName}
             onChange={handleInputChange}
           />
         </div>
@@ -87,10 +112,22 @@ const Login = ({ setShowLoginForm }) => {
         </button>
       </p>
 
-      {/* Forgot Password Modal */}
       {isModalOpen && (
         <Modal closeModal={closeModal} content={<Forgetpass />} />
       )}
+      
+      <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      
     </>
   );
 };

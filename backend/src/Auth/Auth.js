@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const GymUser = require("../Models/Gym");
+const gym = require("../Models/Gym");
 
 const Auth = async (req, res, next) => {
   try {
@@ -13,7 +13,7 @@ const Auth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRETKEY);
 
     // Find the user from the database using the ID in the token
-    req.user = await GymUser.findById(decoded.gym_id).select("-password");
+    req.user = await gym.findById(decoded.gym_id).select("-password");
 
     if (!req.user) {
       return res.status(401).json({ message: "Invalid token, user not found!" });

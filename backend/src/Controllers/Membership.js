@@ -1,43 +1,40 @@
-const Membership = require("../Models/Membershiop"); // make sure file name is correct
+const Membership = require("../Models/Membership"); // Ensure the filename is correct
 
 exports.AddMembership = async (req, res) => {
   try {
     const { months, price } = req.body;
 
-    // Check if the same membership already exists for this gym
-    const existing = await Membership.findOne({ gym: req.user._id, months });
+    const existingMembership = await Membership.findOne({ gym: req.gym._id, months });
 
-    if (existing) {
-      existing.price = price;
-      await existing.save();
+    if (existingMembership) {
+      existingMembership.price = price;
+      await existingMembership.save();
 
       return res.status(200).json({
         success: true,
         message: "Membership updated successfully",
-        membership: existing
+        membership: existingMembership,
+      });
+    } else {
+      const newMembership = new Membership({
+        months,
+        price,
+        gym: req.gym._id,
+      });
+
+      await newMembership.save();
+
+      return res.status(201).json({
+        success: true,
+        message: "Membership added successfully",
+        membership: newMembership,
       });
     }
-
-    // Create new membership
-    const newMembership = await Membership.create({
-      gym: req.user._id,
-      months,
-      price
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: "Membership added successfully",
-      membership: newMembership
-    });
-
-  } catch (error) {
-    console.error("AddMembership Error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
+  } catch (err) {
+    console.log("Add Membership Error:", err);
+    return res.status(500).json({ success: false, error: "Server Error" });
   }
 };
-
-
 
 
 

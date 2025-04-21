@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Signup = ({ setShowLoginForm }) => {
   const [formData, setFormData] = useState({
-    username: "",
+    userName: "", // Changed from username to match backend
     email: "",
     password: "",
     gymName: "",
@@ -10,6 +13,7 @@ const Signup = ({ setShowLoginForm }) => {
   });
 
   const [previewImage, setPreviewImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,38 +33,55 @@ const Signup = ({ setShowLoginForm }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    let imageUrl = "";
+    try {
+      let imageUrl = "";
 
-    if (formData.profilePic) {
-      console.log("image uploading");
-      
-      const data = new FormData();
-      data.append("file", formData.profilePic);
-      data.append("upload_preset", "gym-management-system"); // 🔁 Replace with your actual preset
-      data.append("cloud_name", "dr4nfueet"); // 🔁 Replace with your actual cloud name
+      // Upload image to Cloudinary if exists
+      if (formData.profilePic) {
+        const data = new FormData();
+        data.append("file", formData.profilePic);
+        data.append("upload_preset", "gym-management-system");
+        data.append("cloud_name", "dr4nfueet");
 
-      try {
         const res = await fetch("https://api.cloudinary.com/v1_1/dr4nfueet/image/upload", {
           method: "POST",
           body: data,
         });
         const result = await res.json();
         imageUrl = result.secure_url;
-      } catch (err) {
-        console.error("Cloudinary Upload Error:", err);
       }
+
+      // Prepare data for backend
+      const registrationData = {
+        userName: formData.userName,
+        email: formData.email,
+        password: formData.password,
+        gymName: formData.gymName,
+        profilePic: imageUrl || "",
+      };
+
+      // Send registration data to backend
+      const response = await axios.post(
+        "http://localhost:5000/auth/register",
+        registrationData,
+        { withCredentials: true }
+      );
+
+      toast.success("Registration successful!");
+      console.log("Registration response:", response.data);
+
+      // Optionally switch to login form after successful registration
+      setShowLoginForm(true);
+
+    } catch (err) {
+      console.error("Registration error:", err);
+      const errorMessage = err.response?.data?.message || "Registration failed. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Submit all form data
-    const finalData = {
-      ...formData,
-      profilePic: imageUrl || "", // Use uploaded image URL or empty string
-    };
-
-    console.log("Form Submitted:", finalData);
-
-    // Here you can send `finalData` to your backend if needed
   };
 
   return (
@@ -72,11 +93,12 @@ const Signup = ({ setShowLoginForm }) => {
           <label className="block text-sm mb-2">Username</label>
           <input
             type="text"
-            name="username"
-            value={formData.username}
+            name="userName" // Changed to match backend
+            value={formData.userName}
             onChange={handleChange}
             className="w-full p-3 bg-gray-700 text-white rounded-md"
             placeholder="Enter username"
+            required
           />
         </div>
 
@@ -90,6 +112,7 @@ const Signup = ({ setShowLoginForm }) => {
             onChange={handleChange}
             className="w-full p-3 bg-gray-700 text-white rounded-md"
             placeholder="Enter email"
+            required
           />
         </div>
 
@@ -103,6 +126,7 @@ const Signup = ({ setShowLoginForm }) => {
             onChange={handleChange}
             className="w-full p-3 bg-gray-700 text-white rounded-md"
             placeholder="Enter password"
+            required
           />
         </div>
 
@@ -116,6 +140,7 @@ const Signup = ({ setShowLoginForm }) => {
             onChange={handleChange}
             className="w-full p-3 bg-gray-700 text-white rounded-md"
             placeholder="Enter gym name"
+            required
           />
         </div>
 
@@ -148,9 +173,10 @@ const Signup = ({ setShowLoginForm }) => {
 
         <button
           type="submit"
-          className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md w-full"
+          className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md w-full disabled:opacity-50"
+          disabled={isLoading}
         >
-          Register
+          {isLoading ? "Registering..." : "Register"}
         </button>
 
         <p className="text-center mt-4 text-sm text-white">
@@ -164,6 +190,18 @@ const Signup = ({ setShowLoginForm }) => {
           </button>
         </p>
       </form>
+
+      <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </>
   );
 };

@@ -15,7 +15,7 @@ const MembershipSchema = new mongoose.Schema(
     },
     gym: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "GymUser",
+      ref: "gym",
       required: true,
     },
   },
@@ -23,4 +23,4 @@ const MembershipSchema = new mongoose.Schema(
 );
 
 // Export the Membership model
-module.exports = mongoose.model("Membership", MembershipSchema);
+module.exports = mongoose.model("membership", MembershipSchema);

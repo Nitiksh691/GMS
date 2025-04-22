@@ -24,11 +24,11 @@ const Forgetpass = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/auth/forgot-password", { email: form.email });
-      toast.success(res.data.message || "Reset link sent to email");
+      const res = await axios.post("http://localhost:5000/auth/reset-password/sendOTP", { email: form.email });
+      toast.success(res.data.message || "OTP sent to email");
       setStep(2);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to send reset link");
+      toast.error(err.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ const Forgetpass = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/auth/verify-otp", {
+      const res = await axios.post("http://localhost:5000/auth/reset-password/verify-otp", {
         email: form.email,
         token: form.otp,
       });
@@ -60,13 +60,14 @@ const Forgetpass = () => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (!form.newPassword || !form.otp) return toast.error("Missing info");
+    if (!form.newPassword || !form.otp || !form.email) return toast.error("Missing info");
 
     try {
       setLoading(true);
       const res = await axios.post("http://localhost:5000/auth/reset-password", {
         token: form.otp,
         newPassword: form.newPassword,
+        email: form.email,
       });
 
       toast.success(res.data.message || "Password reset successfully");
@@ -81,8 +82,6 @@ const Forgetpass = () => {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
-      {/* {loading && <Loader />} */}
-
       {step === 1 && (
         <form onSubmit={handleSubmitEmail}>
           <h2 className="text-xl font-bold mb-4">Forgot Password</h2>
@@ -139,9 +138,7 @@ const Forgetpass = () => {
           </button>
         </form>
       )}
-      {
-        loading && <Loader/>
-      }
+      {loading && <Loader />}
     </div>
   );
 };

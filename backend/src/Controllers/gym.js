@@ -99,48 +99,37 @@ exports.login = async (req, res) => {
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: '', // Add your email
-    pass: '', // Use an App Password if 2FA is enabled
+    user: '', // add your Gmail
+    pass: '', // app password
   },
 });
 
-// RESET PASSWORD CONTROLLER
+// Send OTP
 exports.sendOTP = async (req, res) => {
   const { email } = req.body;
 
   try {
     const user = await gym.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Generate a 6-digit OTP
     const buffer = crypto.randomBytes(4);
     const token = (buffer.readUInt32BE(0) % 900000) + 100000;
 
-    // Save token and expiry to user
     user.resetPasswordToken = token;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    // Email configuration
-    const mainOption = {
+    const mailOptions = {
       from: 'nitikshpal@gmail.com',
       to: email,
       subject: 'OTP Verification for Password Reset',
       text: `You requested an OTP for password reset. Your OTP is: ${token}`,
     };
 
-    // Send email
-    transporter.sendMail(mainOption, (error, info) => {
-      if (error) {
-        console.error('Error sending OTP email:', error);
-        return res.status(500).json({ message: 'Failed to send OTP email' });
-      }
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) return res.status(500).json({ message: 'Failed to send OTP email' });
       res.status(200).json({ message: 'OTP sent to email successfully' });
     });
-
   } catch (error) {
     console.error('sendOTP Error:', error);
     res.status(500).json({ message: 'Something went wrong' });
@@ -149,73 +138,53 @@ exports.sendOTP = async (req, res) => {
 
 
 //   CHECK OTP
-  exports.checkOTP = async (req, res) => {
-    try {
-      const { email, token } = req.body;
-  
-      // Find user with matching token and check token expiry
-      const user = await gym.findOne({
-        email,
-        resetPasswordToken: token,
-        resetPasswordExpires: { $gt: Date.now() }
-      });
-  
-      if (!user) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid or expired OTP token'
-        });
-      }
-  
-      return res.status(200).json({
-        success: true,
-        message: 'OTP verified successfully'
-      });
-  
-    } catch (error) {
-      console.error('OTP Verification Error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'An internal server error occurred'
-      });
-    }
-}; 
-
-// RESET----PASSWORD
-exports.resetPassword = async (req, res) => {
+exports.checkOTP = async (req, res) => {
   try {
-    const { token, newPassword } = req.body;
+    const { email, token } = req.body;
 
-    // Find user by token and check if token is still valid
-    const user = await gym.findOne({email});
+    const user = await gym.findOne({
+      email,
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired reset token',
-      });
+      return res.status(400).json({ success: false, message: 'Invalid or expired OTP token' });
     }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    res.status(200).json({ success: true, message: 'OTP verified successfully' });
+  } catch (error) {
+    console.error('OTP Verification Error:', error);
+    res.status(500).json({ success: false, message: 'An internal server error occurred' });
+  }
+};
 
-    // Update password and clear reset token fields
+
+// Reset Password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword, email } = req.body;
+
+    const user = await gym.findOne({
+      email,
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    return res.status(200).json({
-      success: true,
-      message: 'Password has been reset successfully',
-    });
-
+    res.status(200).json({ success: true, message: 'Password has been reset successfully' });
   } catch (error) {
     console.error('Reset Password Error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An internal server error occurred',
-    });
+    res.status(500).json({ success: false, message: 'An internal server error occurred' });
   }
 };
 

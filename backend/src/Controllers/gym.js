@@ -95,51 +95,58 @@ exports.login = async (req, res) => {
 };
 
 
-//   RESET-PASSWORD
-exports.sendResetLink = async (req, res) => {
-    const { email } = req.body;
-  
-    try {
-      const user = await gym.findOne({ email });
-  
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      // Generate token and expiry
-      const resetToken = crypto.randomBytes(32).toString('hex');
-      const tokenExpiry = Date.now() + 3600000; // 1 hour
-  
-      user.resetPasswordToken = resetToken;
-      user.resetPasswordExpires = tokenExpiry;
-      await user.save();
-  
-      // Setup mail transport
-      const transporter = nodemailer.createTransport({
-        service: 'gmail', // or any other email provider
-        auth: {
-          user: 'your-email@gmail.com',
-          pass: 'your-app-password', // use App Password if 2FA is on
-        },
-      });
-  
-      const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+// NodeMailer-related setup
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: '', // Add your email
+    pass: '', // Use an App Password if 2FA is enabled
+  },
+});
 
-  
-      await transporter.sendMail({
-        to: email,
-        subject: 'Password Reset',
-        html: `<p>Click the link to reset your password:</p>
-               <a href="${resetURL}">${resetURL}</a>`,
-      });
-  
-      res.status(200).json({ message: 'Password reset link sent to email' });
-  
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Something went wrong' });
+// RESET PASSWORD CONTROLLER
+exports.sendOTP = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await gym.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    // Generate a 6-digit OTP
+    const buffer = crypto.randomBytes(4);
+    const token = (buffer.readUInt32BE(0) % 900000) + 100000;
+
+    // Save token and expiry to user
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Email configuration
+    const mainOption = {
+      from: 'nitikshpal@gmail.com',
+      to: email,
+      subject: 'OTP Verification for Password Reset',
+      text: `You requested an OTP for password reset. Your OTP is: ${token}`,
+    };
+
+    // Send email
+    transporter.sendMail(mainOption, (error, info) => {
+      if (error) {
+        console.error('Error sending OTP email:', error);
+        return res.status(500).json({ message: 'Failed to send OTP email' });
+      }
+      res.status(200).json({ message: 'OTP sent to email successfully' });
+    });
+
+  } catch (error) {
+    console.error('sendOTP Error:', error);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
 };
+
 
 //   CHECK OTP
   exports.checkOTP = async (req, res) => {
@@ -180,10 +187,7 @@ exports.resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
 
     // Find user by token and check if token is still valid
-    const user = await gym.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
-    });
+    const user = await gym.findOne({email});
 
     if (!user) {
       return res.status(400).json({

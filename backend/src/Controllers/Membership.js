@@ -1,4 +1,5 @@
-const Membership = require("../Models/Membership"); // Ensure the filename is correct
+const Membership = require("../Models/Membership"); 
+const gym = require("../Models/Gym");
 
 exports.AddMembership = async (req, res) => {
   try {
